@@ -14,9 +14,9 @@ router.post('/', async (req, res) => {
     try {
         const newUser = await prisma.user.create({
             data: {
-                name: req.body.username,
+                username: req.body.username,
                 password: hashedPassword,
-                rating: 1000
+                rating: '1000'
             }
         })
 
@@ -46,7 +46,7 @@ router.post('/login', async (req, res) => {
 
         const token = await jwt.sign({
             sub: user.id,
-            name: user.username,
+            username: user.username,
             rating: user.rating,
         }, process.env.JWT_SECRET, { expiresIn: '1h' })
 
@@ -57,7 +57,40 @@ router.post('/login', async (req, res) => {
     }
 })
 
-router.get('users/profile', authorize, async (req, res) => {
+router.put('/', authorize, async (req, res) => {
+    try {
+        const newUser = await prisma.user.update({
+            where: {
+                id: req.userData.sub,
+            },
+            data: {
+                rating: req.body.newRating
+            }
+        })
+
+        res.send({ msg: "Rating updated" })
+    }
+    catch (error) {
+        console.log(error)
+        res.status(500).send({ msg: "User not found." })
+    }
+})
+
+router.delete('/', authorize, async (req, res) => {
+    
+    try {
+        const newNote = await prisma.user.delete({
+            where: {
+                id: req.userData.sub
+            }
+        })
+        res.send("User deleted!")
+    } catch (error) {
+        res.status(500).send({msg: "User not found."})
+    }
+})
+
+router.get('/profile', authorize, async (req, res) => {
     try {
         const user = await prisma.user.findUnique({
             where: {

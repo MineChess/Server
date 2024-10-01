@@ -21,3 +21,4 @@ EXPOSE 3000
 CMD ["sh", "-c", "if [ \"$MODE\" = 'development' ]; then npm run dev; else npm start; fi"]
 
 
+
