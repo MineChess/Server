@@ -9,6 +9,9 @@ const prisma = new PrismaClient()
 
 router.post('/', async (req, res) => {
 
+    //TODO sanitize inputs
+    //TODO server crash if db input bad
+
     const hashedPassword = await bcrypt.hash(req.body.password, 10)
 
     try {
@@ -42,6 +45,7 @@ router.post('/login', async (req, res) => {
         if (!user || !passwordMatch) {
             console.log("Invalid credentials.")
             res.status(401).send({ msg: "Invalid credentials." })
+            return
         }
 
         const token = await jwt.sign({
