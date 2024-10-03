@@ -16,3 +16,10 @@ model User {
   updatedAt DateTime @updatedAt
   rating    String
 }
+
+model Game {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  moves     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
