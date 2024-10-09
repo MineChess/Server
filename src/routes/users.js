@@ -2,22 +2,32 @@ const express = require('express')
 const router = express.Router()
 const { PrismaClient } = require('@prisma/client')
 const authorize = require('../middleware/auth')
-
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const prisma = new PrismaClient()
+const validator = require('validator')
 
 router.post('/', async (req, res) => {
 
-    //TODO sanitize inputs
-    //TODO server crash if db input bad
+    // Sanitize inputs, GPT
+    const sanitizedUsername = validator.trim(req.body.username);
+    const sanitizedPassword = validator.trim(req.body.password);
 
-    const hashedPassword = await bcrypt.hash(req.body.password, 10)
+    // Validate inputs, GPT
+    if (!validator.isAlphanumeric(sanitizedUsername) || !validator.isLength(sanitizedUsername, { min: 3, max: 20 })) {
+        return res.status(400).send({ msg: "Invalid username. It must be alphanumeric and between 3 to 20 characters long" })
+    }
+
+    if (!validator.isLength(sanitizedPassword, { min: 6 })) {
+        return res.status(400).send({ msg: "Password must be at least 6 characters long" })
+    }
+
+    const hashedPassword = await bcrypt.hash(sanitizedPassword, 10)
 
     try {
         const newUser = await prisma.user.create({
             data: {
-                username: req.body.username,
+                username: sanitizedUsername,
                 password: hashedPassword,
                 rating: '1000'
             }
@@ -59,6 +69,12 @@ router.post('/login', async (req, res) => {
 })
 
 router.put('/', authorize, async (req, res) => {
+    // Sanitize and validate new rating, GPT
+    const newRating = validator.trim(req.body.newRating);
+    if (!validator.isNumeric(newRating)) {
+        return res.status(400).send({ msg: "Invalid rating. It must be a numeric value" });
+    }
+
     try {
         const newUser = await prisma.user.update({
             where: {
