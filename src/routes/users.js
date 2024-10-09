@@ -40,13 +40,13 @@ router.post('/login', async (req, res) => {
 
     if (user == null) {
         console.log("BAD USERNAME")
-        return res.status(401).send({ msg: "Authentication failed" })
+        return res.status(401).send({ msg: "User not found" })
     }
     const match = await bcrypt.compare(req.body.password, user.password)
 
     if (!match) {
         console.log("BAD PASSWORD")
-        return res.status(401).send({ msg: "Authentication failed" })
+        return res.status(401).send({ msg: "Invalid credentials" })
     }
 
     const token = await jwt.sign({
@@ -80,7 +80,7 @@ router.put('/', authorize, async (req, res) => {
 router.delete('/', authorize, async (req, res) => {
 
     try {
-        const newNote = await prisma.user.delete({
+        const user = await prisma.user.delete({
             where: {
                 id: req.userData.sub
             }
