@@ -32,33 +32,30 @@ router.post('/', async (req, res) => {
 })
 
 router.post('/login', async (req, res) => {
-
-    try {
-        const user = await prisma.user.findUnique({
-            where: {
-                username: req.body.username
-            }
-        })
-
-        const passwordMatch = await bcrypt.compare(req.body.password, user.password)
-
-        if (!user || !passwordMatch) {
-            console.log("Invalid credentials.")
-            res.status(401).send({ msg: "Invalid credentials." })
-            return
+    const user = await prisma.user.findUnique({
+        where: {
+            username: req.body.username
         }
+    })
 
-        const token = await jwt.sign({
-            sub: user.id,
-            username: user.username,
-            rating: user.rating,
-        }, process.env.JWT_SECRET, { expiresIn: '1h' })
+    if (user == null) {
+        console.log("BAD USERNAME")
+        return res.status(401).send({ msg: "Authentication failed" })
+    }
+    const match = await bcrypt.compare(req.body.password, user.password)
 
-        res.send({ msg: "Logged in!", jwt: token })
+    if (!match) {
+        console.log("BAD PASSWORD")
+        return res.status(401).send({ msg: "Authentication failed" })
     }
-    catch (error) {
-        res.status(500).send({ msg: "No such user." })
-    }
+
+    const token = await jwt.sign({
+        sub: user.id,
+        username: user.username,
+        rating: user.rating
+    }, process.env.JWT_SECRET, { expiresIn: '1d' })
+
+    res.send({ msg: "Login OK", jwt: token })
 })
 
 router.put('/', authorize, async (req, res) => {
@@ -81,7 +78,7 @@ router.put('/', authorize, async (req, res) => {
 })
 
 router.delete('/', authorize, async (req, res) => {
-    
+
     try {
         const newNote = await prisma.user.delete({
             where: {
@@ -90,7 +87,7 @@ router.delete('/', authorize, async (req, res) => {
         })
         res.send("User deleted!")
     } catch (error) {
-        res.status(500).send({msg: "User not found."})
+        res.status(500).send({ msg: "User not found." })
     }
 })
 
@@ -102,7 +99,7 @@ router.get('/profile', authorize, async (req, res) => {
             }
         })
 
-        res.send({msg: `Hej ! ${user.username}`})
+        res.send({ msg: `Hej ! ${user.username}` })
     }
     catch (error) {
         res.status(500).send({ msg: "ERROR" })
