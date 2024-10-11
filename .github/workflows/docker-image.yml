@@ -22,7 +22,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag saile336/my-image-name:latest
+      run: docker build . --file Dockerfile --tag saile336/wom-backend:latest
 
     - name: Push Docker image to Docker Hub
-      run: docker push saile336/my-image-name:latest
+      run: docker push saile336/wom-backend:latest
