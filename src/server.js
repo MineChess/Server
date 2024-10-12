@@ -16,6 +16,11 @@ app.get('/', (req, res) => {
 const usersRouter = require('./routes/users')
 app.use('/users', usersRouter)
 
-app.listen(PORT, () => {
-    console.log(`Server listening on port http://localhost:${PORT}`)
-})
+module.exports = app;
+
+// Only start listening if this script is run directly, not during testing
+if (process.env.NODE_ENV !== 'test') {
+    app.listen(PORT, () => {
+        console.log(`Server listening on port http://localhost:${PORT}`);
+    });
+}
