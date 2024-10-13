@@ -31,3 +31,14 @@ Authorization:  Bearer {{token}}
 DELETE {{apiurl}}/users
 Content-Type: application/json
 Authorization:  Bearer {{token}}
+
+###
+POST {{apiurl}}/games
+Content-Type: application/json
+Authorization:  Bearer {{token}}
+
+{
+    "player1Id": "6706cbe62c4b288d7679e4fb",
+    "player2Id": "6707eaf9b75c8fb263391580",
+    "moves": "14 15, 13 12"
+}
