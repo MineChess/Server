@@ -26,7 +26,7 @@ router.post('/', authorize, async (req, res) => {
     }
 })
 
-router.get('/', async (req, res) => {
+router.get('/', authorize, async (req, res) => {
 
     try {
         const games = await prisma.game.findMany({
