@@ -27,7 +27,7 @@ router.post('/', async (req, res) => {
     try {
         const newUser = await prisma.user.create({
             data: {
-                username: sanitizedUsername,
+                username: sanitizedUsername.toLowerCase(),
                 password: hashedPassword,
                 rating: '1000'
             }
@@ -37,7 +37,7 @@ router.post('/', async (req, res) => {
     }
     catch (error) {
         console.log(error)
-        res.status(500).send({ msg: "ERROR" })
+        res.status(500).send({ msg: "Error: Try a different username" })
     }
 })
 
@@ -59,7 +59,7 @@ router.get('/', authorize, async (req, res) => {
 router.post('/login', async (req, res) => {
     const user = await prisma.user.findUnique({
         where: {
-            username: req.body.username
+            username: req.body.username.toLowerCase()
         }
     })
 
@@ -80,7 +80,7 @@ router.post('/login', async (req, res) => {
         rating: user.rating
     }, process.env.JWT_SECRET, { expiresIn: '1d' })
 
-    res.send({ msg: "Login OK", jwt: token })
+    res.send({ msg: "Login OK", jwt: token, user: user.username })
 })
 
 router.put('/', authorize, async (req, res) => {
@@ -108,19 +108,35 @@ router.put('/', authorize, async (req, res) => {
     }
 })
 
-router.delete('/', authorize, async (req, res) => {
-
+router.delete('/:username', authorize, async (req, res) => {
     try {
-        const user = await prisma.user.delete({
+        const username = req.params.username;
+
+        // Check that user exists and user is a user in user
+        const user = await prisma.user.findFirst({
             where: {
+                username: username,
                 id: req.userData.sub
             }
-        })
-        res.send("User deleted!")
+        });
+
+        if (!user) {
+            return res.status(404).send({ msg: "User not found or you are not authorized to delete it" });
+        }
+
+        // Delete user
+        await prisma.user.delete({
+            where: {
+                username: username
+            }
+        });
+
+        res.send({ msg: "User deleted" });
     } catch (error) {
-        res.status(500).send({ msg: "User not found." })
+        console.log(error);
+        res.status(500).send({ msg: error });
     }
-})
+});
 
 router.get('/profile', authorize, async (req, res) => {
     try {
