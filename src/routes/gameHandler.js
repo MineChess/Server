@@ -7,25 +7,6 @@ const jwt = require('jsonwebtoken')
 const prisma = new PrismaClient()
 const validator = require('validator')
 
-router.post('/', authorize, async (req, res) => {
-    console.log('Player 1 ID:', req.body.player1Id)
-    console.log('Player 2 ID:', req.body.player2Id)
-    console.log('aaaaaa', req.body.moves)
-    try {
-        const game = await prisma.game.create({
-            data: {
-                player1Id: req.body.player1Id,
-                player2Id: req.body.player2Id,
-                moves: req.body.moves
-            }
-        })
-        res.send({ msg: 'Game created', })
-    } catch (error) {
-        console.log(error)
-        res.status(500).send({ msg: "ERROR" })
-    }
-})
-
 router.get('/', authorize, async (req, res) => {
 
     try {
@@ -46,25 +27,7 @@ router.get('/', authorize, async (req, res) => {
 
 router.put('/', authorize, async (req, res) => {
     try {
-        const game = await prisma.game.update({
-            where: {
-                id: req.body.id
-            },
-
-            data: {
-                moves: req.body.moves
-            }
-        })
-        res.send({ msg: "Game updated", game: game })
-    } catch (error) {
-        console.log(error)
-        res.status(500).send({ msg: "ERROR" })
-    }
-})
-
-router.delete('/', authorize, async (req, res) => {
-    try {
-        //Check that game exists and player is a player in game
+        // Validate that the game exists and the user is authorized
         const game = await prisma.game.findFirst({
             where: {
                 id: req.body.id,
@@ -79,7 +42,7 @@ router.delete('/', authorize, async (req, res) => {
             return res.status(404).send({ msg: "Game not found or you are not authorized to update it" });
         }
 
-        //Update game
+        // Update the game
         const updatedGame = await prisma.game.update({
             where: {
                 id: req.body.id
@@ -89,12 +52,47 @@ router.delete('/', authorize, async (req, res) => {
             }
         });
 
+        console.log(`Game ${req.body.id} updated`);
         res.send({ msg: "Game updated", game: updatedGame });
     } catch (error) {
         console.log(error);
         res.status(500).send({ msg: "ERROR" });
     }
-})
+});
+
+router.delete('/:id', authorize, async (req, res) => {
+    try {
+        const gameId = req.params.id;
+
+        // Check that game exists and player is a player in game
+        const game = await prisma.game.findFirst({
+            where: {
+                id: gameId,
+                OR: [
+                    { player1Id: req.userData.sub },
+                    { player2Id: req.userData.sub }
+                ]
+            }
+        });
+
+        if (!game) {
+            return res.status(404).send({ msg: "Game not found or you are not authorized to delete it" });
+        }
+
+        // Delete game
+        await prisma.game.delete({
+            where: {
+                id: gameId
+            }
+        });
+
+        res.send({ msg: "Game deleted" });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ msg: "ERROR" });
+    }
+});
+
 router.post('/', authorize, async (req, res) => {
     const { player1Id, player2Id, moves } = req.body;
 
@@ -106,7 +104,7 @@ router.post('/', authorize, async (req, res) => {
     try {
         const game = await prisma.game.create({
             data: {
-                player1Id: player1Id,
+                player1Id: req.userData.sub,
                 player2Id: player2Id,
                 moves: moves || '', // Initialize moves with empty string if not provided
             }
