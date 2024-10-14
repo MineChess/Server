@@ -80,7 +80,7 @@ router.post('/login', async (req, res) => {
         rating: user.rating
     }, process.env.JWT_SECRET, { expiresIn: '1d' })
 
-    res.send({ msg: "Login OK", jwt: token, user: req.body.username.toLowerCase() })
+    res.send({ msg: "Login OK", jwt: token, user: user.username })
 })
 
 router.put('/', authorize, async (req, res) => {
