@@ -41,6 +41,21 @@ router.post('/', async (req, res) => {
     }
 })
 
+router.get('/', authorize, async (req, res) => {
+    try {
+        const users = await prisma.user.findMany({
+            select: {
+                id: true,
+                username: true
+            }
+        });
+        res.send(users);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ msg: "Error fetching users" });
+    }
+});
+
 router.post('/login', async (req, res) => {
     const user = await prisma.user.findUnique({
         where: {

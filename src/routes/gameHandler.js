@@ -95,5 +95,27 @@ router.delete('/', authorize, async (req, res) => {
         res.status(500).send({ msg: "ERROR" });
     }
 })
+router.post('/', authorize, async (req, res) => {
+    const { player1Id, player2Id, moves } = req.body;
+
+    // Check if both player1Id and player2Id are provided
+    if (!player1Id || !player2Id) {
+        return res.status(400).send({ msg: "Both player1Id and player2Id are required" });
+    }
+
+    try {
+        const game = await prisma.game.create({
+            data: {
+                player1Id: player1Id,
+                player2Id: player2Id,
+                moves: moves || '', // Initialize moves with empty string if not provided
+            }
+        });
+        res.send({ msg: 'Game created successfully!', game });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ msg: "Error creating game" });
+    }
+});
 
 module.exports = router
