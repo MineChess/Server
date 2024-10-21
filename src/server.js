@@ -21,6 +21,9 @@ app.use('/games', gameHandler)
 
 module.exports = app;
 
-app.listen(PORT, () => {
-    console.log(`Server listening on port http://localhost:${PORT}`)
-})
+// Only start listening if this script is run directly, not during testing
+if (process.env.NODE_ENV !== 'test') {
+    app.listen(PORT, () => {
+        console.log(`Server listening on port http://localhost:${PORT}`);
+    });
+}
