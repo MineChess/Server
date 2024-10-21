@@ -19,6 +19,8 @@ app.use('/users', usersRouter)
 const gameHandler = require('./routes/gameHandler')
 app.use('/games', gameHandler)
 
+module.exports = app;
+
 app.listen(PORT, () => {
     console.log(`Server listening on port http://localhost:${PORT}`)
 })
