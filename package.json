@@ -4,15 +4,17 @@
   "description": "",
   "main": "src/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "start": "npx prisma generate && node src/server.js",
     "dev": "npx prisma generate && nodemon -L src/server.js"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "jest": "^29.7.0",
     "nodemon": "^3.1.7",
-    "prisma": "^5.20.0"
+    "prisma": "^5.20.0",
+    "supertest": "^7.0.0"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",
