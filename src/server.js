@@ -6,7 +6,7 @@ const app = express()
 app.use(express.json())
 
 app.use(cors({
-    origin: [process.env.DEV_ORIGIN, 'capacitor://localhost']
+    origin: [process.env.DEV_ORIGIN, 'capacitor://localhost', 'http://localhost']
 }))
 
 app.get('/', (req, res) => {
