@@ -1,13 +1,13 @@
 const express = require('express')
 require('dotenv').config()
-const cors = require('cors')
+//const cors = require('cors')
 const PORT = process.env.PORT || 3000
 const app = express()
 app.use(express.json())
 
-app.use(cors({
-    origin: [process.env.DEV_ORIGIN, 'capacitor://localhost', 'http://localhost']
-}))
+/*app.use(cors({
+    origin: process.env.DEV_ORIGIN
+}))*/
 
 app.get('/', (req, res) => {
     res.send("Nothing of note here.")
